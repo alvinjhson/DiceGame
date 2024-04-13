@@ -18,6 +18,10 @@ struct ContentView: View {
     @State var texField = "Put in number"
     @State var userInput: String = "0"
     @State var pot = 0
+    @State private var selectedDiceType = "fill"
+        let diceTypes = ["black", "white"]
+
+
     
     var body: some View {
       
@@ -44,13 +48,21 @@ struct ContentView: View {
                     .padding()
                 Spacer()
                 
+                
                 HStack{
-                    DiceView(n: playerDice)
-                    DiceView(n: botDice)
+                   // DiceView(n: playerDice)
+                    DiceView(diceType: selectedDiceType, n: botDice)
                     
                 }.onAppear(){
                    // newDiceValues()
                 }
+                Picker("Välj tärningstyp", selection: $selectedDiceType) {
+                               ForEach(diceTypes, id: \.self) { type in
+                                   Text(type).tag(type)
+                               }
+                           }
+                           .pickerStyle(SegmentedPickerStyle())
+                       
                 
                 
                 Button(action:  {
@@ -68,7 +80,7 @@ struct ContentView: View {
                 )
                 .background(Color.red)
                 .cornerRadius(15.0)
-                Spacer()
+                
                 
                 Button(action:  {
                     bet()
@@ -151,14 +163,26 @@ struct ContentView: View {
     }
 }
 
-struct DiceView : View {
-    var n : Int
+
+struct DiceView: View {
+    var diceType: String
+    var n: Int
+
     var body: some View {
-        Image(systemName: "die.face.\(n)")
-            .resizable().aspectRatio(contentMode: .fit).padding()
-        
+        if diceType == "black" {
+            Image(systemName: "die.face.\(n).fill")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+        } else {
+            Image(systemName: "die.face.\(n)")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 100, height: 100)
+        }
     }
 }
+
 struct WinSheet :View {
     let playerSum : Int
     let botSum : Int
