@@ -14,13 +14,23 @@ struct ContentView: View {
     @State var playerSum = 0
     @State var botSum = 0
     @State var showingWinSheet = false
+    @State var playerBalance = 100
+    @State var texField = "Put in number"
+    @State var userInput: String = "0"
+    @State var pot = 0
     
     var body: some View {
+      
         ZStack{
             Color(red: 38/256, green:108/256, blue: 59/256)
                 .ignoresSafeArea()
             VStack {
-                Text("\(playerSum)")
+                Text("\(playerBalance)")
+                    .font(.title)
+                    .foregroundColor(.white)
+                    .fontWeight(.bold)
+                
+                Text("\(userInput)")
                     .font(.title)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
@@ -28,6 +38,10 @@ struct ContentView: View {
                     .font(.title)
                     .foregroundColor(.white)
                     .fontWeight(.bold)
+                TextField(texField, text: $userInput)
+                    .foregroundColor(.black)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
                 Spacer()
                 
                 HStack{
@@ -35,7 +49,7 @@ struct ContentView: View {
                     DiceView(n: botDice)
                     
                 }.onAppear(){
-                    newDiceValues()
+                   // newDiceValues()
                 }
                 
                 
@@ -48,16 +62,42 @@ struct ContentView: View {
                         .padding()
                     
                 }
+                       
+                       
+                       
+                )
+                .background(Color.red)
+                .cornerRadius(15.0)
+                Spacer()
+                
+                Button(action:  {
+                    bet()
+                }, label: {
+                    Text("Bet")
+                        .font(.largeTitle)
+                        .foregroundColor(Color.white)
+                        .padding()
+                    
+                }
+                       
+                       
+                       
                 )
                 .background(Color.red)
                 .cornerRadius(15.0)
                 Spacer()
                 
                 
+                
             }
         }
+        
+        
+        
+        
         .sheet(isPresented: $showingWinSheet, onDismiss: { playerSum = 0
-            botSum = 0} , content: {
+            botSum = 0
+        userInput = ""} , content: {
            WinSheet(playerSum: playerSum, botSum: botSum)
          
        
@@ -69,7 +109,7 @@ struct ContentView: View {
     
     
     func roll(){
-        newDiceValues()
+       // newDiceValues()
         playerSum += playerDice
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // Lägg märke till "+ 2", det är din fördröjning i sekunder!
@@ -79,19 +119,32 @@ struct ContentView: View {
             win()
         }
     }
-               func win() {
-                   if(playerSum != 0 && botSum != 0) {
-                    showingWinSheet = true
-                          
-                      }
-                       
-                   }
-
-
-    func newDiceValues() {
-       playerDice = Int.random(in: 1...6)
-  
+    func bet() {
+        playerBalance -= 10
+        pot += 10 * 2
     }
+    
+    func win() {
+        if let userInputAsInt = Int(userInput) { // Försöker konvertera strängen till en Int
+            if userInputAsInt != 0 && botSum != 0 { // Jämför det konverterade värdet med botSum
+                showingWinSheet = true
+                playerSum = userInputAsInt
+                if(userInputAsInt == botSum){
+                    playerBalance += pot
+                }else{
+                    pot = 0
+                }
+                
+        
+            }
+        } else {
+            // Hantera fallet där konverteringen misslyckas, kanske visa ett felmeddelande?
+        }
+    }
+    //func newDiceValues() {
+      // playerDice = Int.random(in: 1...6)
+  
+    //}
     func botDiceValue() {
         botDice = Int.random(in: 1...6)
         
@@ -116,15 +169,15 @@ struct WinSheet :View {
             
             VStack {
                 if(playerSum > botSum){
-                    Text("Winer player")
+                    Text("Winer bot to high")
                         .foregroundColor(.white)
                         .font(.title)
                 } else if(playerSum == botSum) {
-                    Text("Draw")
+                    Text("Winer player")
                         .foregroundColor(.white)
                         .font(.title)
                 }else {
-                    Text("Winer bot")
+                    Text("Winer bot to low")
                         .foregroundColor(.white)
                         .font(.title)
                 }
